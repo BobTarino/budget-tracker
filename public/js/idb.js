@@ -16,7 +16,7 @@ request.onsuccess = function(event) {
   
     // check if app is online, if yes run uploadTransaction() function to send all local db data to api
     if (navigator.onLine) {
-    //   uploadTransaction();
+      uploadTransaction();
     }
   };
   
@@ -36,3 +36,48 @@ function saveRecord(record) {
     // add record to your store with add method
     transactionObjectStore.add(record);
 }
+
+function uploadTransaction() {
+    // open a transaction on your db
+    const transaction = db.transaction(['new_bTransaction'], 'readwrite');
+  
+    // access your object store
+    const transactionObjectStore = transaction.objectStore('new_bTransaction');
+  
+    // get all records from store and set to a variable
+    const getAll = transactionObjectStore.getAll();
+  
+    getAll.onsuccess = function() {
+        // if there was data in indexedDb's store, let's send it to the api server
+        if (getAll.result.length > 0) {
+          fetch('/api/transactions', {
+            method: 'POST',
+            body: JSON.stringify(getAll.result),
+            headers: {
+              Accept: 'application/json, text/plain, */*',
+              'Content-Type': 'application/json'
+            }
+          })
+            .then(response => response.json())
+            .then(serverResponse => {
+              if (serverResponse.message) {
+                throw new Error(serverResponse);
+              }
+              // open one more transaction
+              const transaction = db.transaction(['new_bTransaction'], 'readwrite');
+              // access the new_pizza object store
+              const transactionObjectStore = transaction.objectStore('new_bTransaction');
+              // clear all items in your store
+              transactionObjectStore.clear();
+    
+              alert('All saved transaction data has been submitted!');
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        }
+      };
+}
+
+window.addEventListener('online', uploadTransaction);
+
