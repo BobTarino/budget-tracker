@@ -7,7 +7,7 @@ request.onupgradeneeded = function(event) {
     // save a reference to the database 
     const db = event.target.result;
     // create an object store (table) called `new_transaction', set it to have an auto incrementing primary key of sorts 
-    db.createObjectStore('new_transaction', { autoIncrement: true });
+    db.createObjectStore('new_bTransaction', { autoIncrement: true });
 };
 // upon a successful 
 request.onsuccess = function(event) {
@@ -16,7 +16,7 @@ request.onsuccess = function(event) {
   
     // check if app is online, if yes run uploadTransaction() function to send all local db data to api
     if (navigator.onLine) {
-      // uploadTransaction();
+    //   uploadTransaction();
     }
   };
   
@@ -28,11 +28,11 @@ request.onerror = function(event) {
 // This function will be executed if we attempt to submit a new Transaction and there's no internet connection
 function saveRecord(record) {
     // open a new transaction ((not to be confused with transaction model)) with the database with read and write permissions 
-    const dbTransaction = db.dbTransaction(['new_Transaction'], 'readwrite');
+    const transaction = db.transaction(['new_bTransaction'], 'readwrite');
   
     // access the object store for `new_Transaction`
-    const TransactionObjectStore = dbTransaction.objectStore('new_Transaction');
+    const transactionObjectStore = transaction.objectStore('new_bTransaction');
   
     // add record to your store with add method
-    TransactionObjectStore.add(record);
+    transactionObjectStore.add(record);
 }
